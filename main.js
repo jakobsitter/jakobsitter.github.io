@@ -3,20 +3,25 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 //Define elements: scene (required), renderder (required), camera (required), a model loader (filetype specific), lights, controls (for mouse and keyboard interaction)
+const div = document.querySelector('.threewrapper')
 const scene = new THREE.Scene();
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera( 75, 500 / 500, 0.1, 1000 );
 const loader = new GLTFLoader();
 const light = new THREE.AmbientLight(0xffffff, 1); // Soft white light
 const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 const controls = new OrbitControls( camera, renderer.domElement );
+
+
+//controls.target = new THREE.Vector3(0, 0, 0)
 let loadedModel;
+
 function setScene() {
     //Enable shadows on renderer
     renderer.shadowMap.enabled = true;
 
     //Set renderer size to window size, could be a number if you want it in x pixels
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize( 500, 500 );
 
     //Add the two lights we defined to the scene, set position of directional light
     scene.add(light);
@@ -24,13 +29,11 @@ function setScene() {
 
 
     //Add a background color
-    scene.background = new THREE.Color( 'skyblue' );
+    scene.background = new THREE.Color( 'lightgray' );
 
-
-    //Set camera position
-    camera.position.set(2, 2, 2);
-    //Set orbitcontrols target
+    camera.position.set(1, -1, 0); // Move the camera to a different position
     controls.target.set(0, 0, 0);
+    //camera.rotation.y = new THREE.Math.degToRad(0);
 
     //Set directional light position
     directionalLight.position.set(5, 10, 7.5);
@@ -49,8 +52,14 @@ function addPlane() {
 
 function addModel() {
     //Load our model
-    loader.load( 'model.glb', function ( gltf ) {
+    loader.load( 'Jakob3D.glb', function ( gltf ) {
         loadedModel = gltf.scene;
+
+        loadedModel.traverse((obj)=>{
+            obj.material = new THREE.MeshStandardMaterial({color: 'blue', wireframe: false})
+        })
+
+        loadedModel.position.set(0,-.2,0)
         scene.add( gltf.scene );
 
     }, undefined, function ( error ) {
@@ -76,17 +85,17 @@ function addSphere(){
     scene.add(sphere);
 }
 setScene();
-addPlane();
-addSphere();
-//addModel();
+//addPlane();
+//addSphere();
+addModel();
 function animate() {
     requestAnimationFrame(animate);
     if (loadedModel) {
-        loadedModel.rotation.y += 0.01; // Rotate around the Y-axis
+        loadedModel.rotation.y += 0.1; // Rotate around the Y-axis
     }
     controls.update();
     renderer.render(scene, camera);
 }
 animate();
 
-document.body.appendChild( renderer.domElement );
+div.appendChild( renderer.domElement );
